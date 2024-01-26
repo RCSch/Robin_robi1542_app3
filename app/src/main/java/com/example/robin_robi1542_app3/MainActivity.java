@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ClockListener {
 
     private RecyclerView recyclerView;
     private ClockAdapter clockAdapter;
@@ -86,7 +86,17 @@ public class MainActivity extends AppCompatActivity {
         clockList.add(newClock);
         clockAdapter.notifyDataSetChanged();
     }
+    @Override
+    public void onTick(long millisUntilFinished) {
+        // Update UI with the tick information
+        // For example, you might want to update a TextView with the remaining time
+    }
 
+    @Override
+    public void onFinish() {
+        // Handle completion event
+        // For example, update UI to indicate that the timer has finished
+    }
 
 
 

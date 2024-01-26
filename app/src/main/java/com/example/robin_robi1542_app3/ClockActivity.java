@@ -1,4 +1,5 @@
 package com.example.robin_robi1542_app3;import android.os.CountDownTimer;
+import android.widget.EditText;
 
 public class ClockActivity {
     private int hours;
@@ -7,6 +8,37 @@ public class ClockActivity {
     private long totalTimeInMillis;
     private boolean isRunning;
     private CountDownTimer countDownTimer;
+
+    //De tre metoder nedenfor har til formål at sikre, at timer, minutter og sekunder ikke er null.
+    public void setHoursFromEditText(EditText editText) {
+        String hoursText = editText.getText().toString();
+        if (hoursText.isEmpty() || hoursText.equals("00")) {
+            hours = 0;
+        } else {
+            hours = Integer.parseInt(hoursText);
+        }
+        totalTimeInMillis = calculateTotalTimeInMillis();
+    }
+
+    public void setMinutesFromEditText(EditText editText) {
+        String minutesText = editText.getText().toString();
+        if (minutesText.isEmpty() || minutesText.equals("00")) {
+            minutes = 0;
+        } else {
+            minutes = Integer.parseInt(minutesText);
+        }
+        totalTimeInMillis = calculateTotalTimeInMillis();
+    }
+
+    public void setSecondsFromEditText(EditText editText) {
+        String secondsText = editText.getText().toString();
+        if (secondsText.isEmpty() || secondsText.equals("00")) {
+            seconds = 0;
+        } else {
+            seconds = Integer.parseInt(secondsText);
+        }
+        totalTimeInMillis = calculateTotalTimeInMillis();
+    }
 
     public ClockActivity() {
         this.hours = 0;
@@ -88,4 +120,25 @@ public class ClockActivity {
     private long calculateTotalTimeInMillis() {
         return (seconds * 1000) + (minutes * 60000) + (hours * 3600000);
     }
+
+
+    private ClockListener clockListener;
+
+    public void setClockListener(ClockListener clockListener) {
+        this.clockListener = clockListener;
+    }
+
+    private void notifyTick(long millisUntilFinished) {
+        if (clockListener != null) {
+            clockListener.onTick(millisUntilFinished);
+        }
+    }
+
+    private void notifyFinish() {
+        if (clockListener != null) {
+            clockListener.onFinish();
+        }
+    }
 }
+
+
