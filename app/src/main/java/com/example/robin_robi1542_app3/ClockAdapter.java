@@ -31,7 +31,7 @@ public class ClockAdapter extends RecyclerView.Adapter<ClockAdapter.ClockViewHol
         // Bind data to the ViewHolder
         ClockActivity currentClock = clockList.get(position);
 
-        // Set text or handle clicks here
+        // Set text
         holder.textViewHours.setText(String.valueOf(currentClock.getHours()));
         holder.textViewMinutes.setText(String.valueOf(currentClock.getMinutes()));
         holder.textViewSeconds.setText(String.valueOf(currentClock.getSeconds()));
@@ -47,9 +47,18 @@ public class ClockAdapter extends RecyclerView.Adapter<ClockAdapter.ClockViewHol
             }
         });
 
-        // Set the start/stop button tag to the associated ClockActivity
-        holder.btnStartStop.setTag(currentClock);
+        // Set the start/stop button click listener
+        holder.btnStartStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Notify the listener when the start/stop button is clicked
+                if (clockListener != null) {
+                    clockListener.onStartStopClick(currentClock);
+                }
+            }
+        });
     }
+
 
 
     @Override
@@ -64,13 +73,14 @@ public class ClockAdapter extends RecyclerView.Adapter<ClockAdapter.ClockViewHol
 
     public static class ClockViewHolder extends RecyclerView.ViewHolder {
         TextView textViewHours, textViewMinutes, textViewSeconds;
-        Button btnDelete;
+        Button btnStartStop, btnDelete;
 
         public ClockViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewHours = itemView.findViewById(R.id.editTextHours);
             textViewMinutes = itemView.findViewById(R.id.editTextMinutes);
             textViewSeconds = itemView.findViewById(R.id.editTextSeconds);
+            btnStartStop = itemView.findViewById(R.id.btnStartStop);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }
     }

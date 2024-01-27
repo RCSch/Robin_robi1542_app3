@@ -93,20 +93,18 @@ public class MainActivity extends AppCompatActivity implements ClockListener {
         }
     }
 
-    public void onStartStopClick(View view) {
-        // Find the ClockActivity associated with the clicked button
-        if (view.getTag() instanceof ClockActivity) {
-            ClockActivity clock = (ClockActivity) view.getTag();
+    @Override
+    public void onStartStopClick(ClockActivity clock) {
+        // Start or stop the countdown based on the current state
+        clock.startStop();
 
-            // Start or stop the countdown based on the current state
-            clock.startStop();
-
-            // Notify the adapter that the data set has changed
-            if (clockAdapter != null) {
-                clockAdapter.notifyDataSetChanged();
-            }
+        // Notify the adapter that the data set has changed
+        if (clockAdapter != null) {
+            clockAdapter.notifyDataSetChanged();
         }
     }
+
+
 
     @Override
     public void onDeleteButtonClick(ClockActivity clock) {
