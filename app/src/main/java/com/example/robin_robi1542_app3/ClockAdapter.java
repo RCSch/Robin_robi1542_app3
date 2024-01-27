@@ -46,7 +46,11 @@ public class ClockAdapter extends RecyclerView.Adapter<ClockAdapter.ClockViewHol
                 }
             }
         });
+
+        // Set the start/stop button tag to the associated ClockActivity
+        holder.btnStartStop.setTag(currentClock);
     }
+
 
     @Override
     public int getItemCount() {

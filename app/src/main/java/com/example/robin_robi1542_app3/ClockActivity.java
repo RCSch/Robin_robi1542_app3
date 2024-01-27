@@ -55,6 +55,19 @@ public class ClockActivity {
         this.totalTimeInMillis = calculateTotalTimeInMillis();
         this.isRunning = false;
         this.countDownTimer = createCountDownTimer();
+
+        countDownTimer = new CountDownTimer(totalTimeInMillis, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                notifyTick(millisUntilFinished);
+            }
+
+            @Override
+            public void onFinish() {
+                isRunning = false;
+                notifyFinish();
+            }
+        };
     }
 
     public void setHours(int hours) {
@@ -175,12 +188,12 @@ public class ClockActivity {
         }
     }
 
-    public void onDeleteButtonClick(View view) {
-        // Remove the corresponding clock from the list
-        if (adapter != null) {
-            adapter.removeClock(this);
-        }
-    }
+//    public void onDeleteButtonClick(View view) {
+//        // Remove the corresponding clock from the list
+//        if (adapter != null) {
+//            adapter.removeClock(this);
+//        }
+//    }
 
     public void setAdapter(ClockAdapter adapter) {
         this.adapter = adapter;
