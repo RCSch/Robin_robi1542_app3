@@ -33,11 +33,14 @@ public class MainActivity extends AppCompatActivity implements ClockListener {
 
         // Initialize the clock list and adapter
         clockList = new ArrayList<>();
-        clockAdapter = new ClockAdapter(clockList);
+
+        clockAdapter = new ClockAdapter(clockList, this);
+        recyclerView.setAdapter(clockAdapter);
 
         // Set up the RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(clockAdapter);
+
+
 
         btnNew.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,20 +87,33 @@ public class MainActivity extends AppCompatActivity implements ClockListener {
 
         // Add the new clock to the list and notify the adapter
         clockList.add(newClock);
-        clockAdapter.notifyDataSetChanged();
+
+        if (clockAdapter != null) {
+            clockAdapter.notifyDataSetChanged();
+        }
     }
+
+
+    @Override
+    public void onDeleteButtonClick(ClockActivity clock) {
+        // Remove the clock from the list
+        clockList.remove(clock);
+
+        // Notify the adapter that the data set has changed
+        if (clockAdapter != null) {
+            clockAdapter.notifyDataSetChanged();
+        }
+    }
+
     @Override
     public void onTick(long millisUntilFinished) {
         // Update UI with the tick information
-        // For example, you might want to update a TextView with the remaining time
+
     }
 
     @Override
     public void onFinish() {
-        // Handle completion event
-        // For example, update UI to indicate that the timer has finished
+        //Man kunne godt lave et eller andet her, meeeeen...
     }
-
-
 
 }

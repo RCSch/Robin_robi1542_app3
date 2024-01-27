@@ -1,4 +1,6 @@
 package com.example.robin_robi1542_app3;import android.os.CountDownTimer;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 public class ClockActivity {
@@ -8,6 +10,12 @@ public class ClockActivity {
     private long totalTimeInMillis;
     private boolean isRunning;
     private CountDownTimer countDownTimer;
+
+    private Button deleteButton;
+
+    private ClockAdapter adapter;
+
+
 
     //De tre metoder nedenfor har til formål at sikre, at timer, minutter og sekunder ikke er null.
     public void setHoursFromEditText(EditText editText) {
@@ -51,17 +59,44 @@ public class ClockActivity {
 
     public void setHours(int hours) {
         this.hours = hours;
-        this.totalTimeInMillis = calculateTotalTimeInMillis();
+        adjustTimeComponents();
     }
 
     public void setMinutes(int minutes) {
         this.minutes = minutes;
-        this.totalTimeInMillis = calculateTotalTimeInMillis();
+        adjustTimeComponents();
     }
 
     public void setSeconds(int seconds) {
         this.seconds = seconds;
-        this.totalTimeInMillis = calculateTotalTimeInMillis();
+        adjustTimeComponents();
+    }
+
+    private void adjustTimeComponents() {
+        // Ensure hours are non-negative
+        if (hours < 0) {
+            hours = 0;
+        }
+
+        // Deduct seconds based on hours
+        seconds %= 3600;
+        if (seconds < 0) {
+            seconds += 3600;
+        }
+
+        // Deduct minutes based on remaining seconds
+        minutes %= 60;
+        if (minutes < 0) {
+            minutes += 60;
+        }
+
+        // Ensure seconds are in the range [0, 59]
+        seconds %= 60;
+        if (seconds < 0) {
+            seconds += 60;
+        }
+
+        totalTimeInMillis = calculateTotalTimeInMillis();
     }
 
     public int getHours() {
@@ -138,6 +173,17 @@ public class ClockActivity {
         if (clockListener != null) {
             clockListener.onFinish();
         }
+    }
+
+    public void onDeleteButtonClick(View view) {
+        // Remove the corresponding clock from the list
+        if (adapter != null) {
+            adapter.removeClock(this);
+        }
+    }
+
+    public void setAdapter(ClockAdapter adapter) {
+        this.adapter = adapter;
     }
 }
 
