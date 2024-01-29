@@ -5,7 +5,4 @@ public interface ClockListener {
 
     void onStartStopClick(ClockActivity clock);
 
-    void onTick(long millisUntilFinished);
-
-    void onFinish();
 }

@@ -1,115 +1,71 @@
-package com.example.robin_robi1542_app3;import android.os.CountDownTimer;
-import android.view.View;
-import android.widget.Button;
+package com.example.robin_robi1542_app3;
+
+import android.app.Activity;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.widget.EditText;
 
-public class ClockActivity {
-    private int hours;
+public class ClockActivity extends CountDownTimer {
+    private int hours; //Brugt i min egen hjemmebyggede version, der ikke kørte med millis.
     private int minutes;
     private int seconds;
-    private long totalTimeInMillis;
     private boolean isRunning;
-    private CountDownTimer countDownTimer;
+    private boolean isUpdatingUI = false;
 
-    private Button deleteButton;
+    private Activity activity;
+    private Handler handler;
+    private EditText editTextHours, editTextMinutes, editTextSeconds;
 
-    private ClockAdapter adapter;
+    public ClockActivity(long millisInFuture, long countDownInterval, Activity activity, Handler handler
+                     //, EditText editTextHours, EditText editTextMinutes, EditText editTextSeconds
+    ) {
+        super(millisInFuture, countDownInterval);
+        this.activity = activity;
+        this.handler = new Handler(Looper.getMainLooper());
+//        this.editTextHours = editTextHours;
+//        this.editTextMinutes = editTextMinutes;
+//        this.editTextSeconds = editTextSeconds;
+    }
+    @Override
+    public void onTick(long millisUntilFinished) {
+        // Convert millisUntilFinished to hours, minutes, and seconds
+        long totalSeconds = millisUntilFinished / 1000;
+        int hours = (int) (totalSeconds / 3600);
+        int minutes = (int) ((totalSeconds % 3600) / 60);
+        int seconds = (int) (totalSeconds % 60);
 
+        // Log the current values
+        System.out.println("onTick: " + hours + "h " + minutes + "m " + seconds + "s"); //Ikke nødvendig i det endelige build
 
-
-    //De tre metoder nedenfor har til formål at sikre, at timer, minutter og sekunder ikke er null.
-    public void setHoursFromEditText(EditText editText) {
-        String hoursText = editText.getText().toString();
-        if (hoursText.isEmpty() || hoursText.equals("00")) {
-            hours = 0;
-        } else {
-            hours = Integer.parseInt(hoursText);
-        }
-        totalTimeInMillis = calculateTotalTimeInMillis();
+        // Update UI components (EditText fields) based on the timer values
+        editTextHours.setText(String.format("%02d", hours));
+        editTextMinutes.setText(String.format("%02d", minutes));
+        editTextSeconds.setText(String.format("%02d", seconds));
     }
 
-    public void setMinutesFromEditText(EditText editText) {
-        String minutesText = editText.getText().toString();
-        if (minutesText.isEmpty() || minutesText.equals("00")) {
-            minutes = 0;
-        } else {
-            minutes = Integer.parseInt(minutesText);
+
+    public void updateUI() {
+        if (!isUpdatingUI) {
+            isUpdatingUI = true;
+
+            new Thread(() -> {
+                try {
+                    while (isRunning && !Thread.interrupted()) {
+                        // Use runOnUiThread to update UI from the main thread
+                        activity.runOnUiThread(() -> updateTextViews());
+
+                        // Sleep for one second
+                        Thread.sleep(1000);
+                    }
+                } catch (InterruptedException e) {
+                    // Handle interruption if needed
+                } finally {
+                    isUpdatingUI = false;
+                }
+            }).start();
         }
-        totalTimeInMillis = calculateTotalTimeInMillis();
-    }
-
-    public void setSecondsFromEditText(EditText editText) {
-        String secondsText = editText.getText().toString();
-        if (secondsText.isEmpty() || secondsText.equals("00")) {
-            seconds = 0;
-        } else {
-            seconds = Integer.parseInt(secondsText);
-        }
-        totalTimeInMillis = calculateTotalTimeInMillis();
-    }
-
-    public ClockActivity() {
-        this.hours = 0;
-        this.minutes = 0;
-        this.seconds = 0;
-        this.totalTimeInMillis = calculateTotalTimeInMillis();
-        this.isRunning = false;
-        this.countDownTimer = createCountDownTimer();
-
-        countDownTimer = new CountDownTimer(totalTimeInMillis, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                notifyTick(millisUntilFinished);
-            }
-
-            @Override
-            public void onFinish() {
-                isRunning = false;
-                notifyFinish();
-            }
-        };
-    }
-
-    public void setHours(int hours) {
-        this.hours = hours;
-        adjustTimeComponents();
-    }
-
-    public void setMinutes(int minutes) {
-        this.minutes = minutes;
-        adjustTimeComponents();
-    }
-
-    public void setSeconds(int seconds) {
-        this.seconds = seconds;
-        adjustTimeComponents();
-    }
-
-    private void adjustTimeComponents() {
-        // Ensure hours are non-negative
-        if (hours < 0) {
-            hours = 0;
-        }
-
-        // Deduct seconds based on hours
-        seconds %= 3600;
-        if (seconds < 0) {
-            seconds += 3600;
-        }
-
-        // Deduct minutes based on remaining seconds
-        minutes %= 60;
-        if (minutes < 0) {
-            minutes += 60;
-        }
-
-        // Ensure seconds are in the range [0, 59]
-        seconds %= 60;
-        if (seconds < 0) {
-            seconds += 60;
-        }
-
-        totalTimeInMillis = calculateTotalTimeInMillis();
     }
 
     public int getHours() {
@@ -124,80 +80,63 @@ public class ClockActivity {
         return seconds;
     }
 
-    public long getTotalTimeInMillis() {
-        return totalTimeInMillis;
+    private void updateTextViews() {
+        // Update UI components (EditText fields) based on the clock state
+        activity.runOnUiThread(() -> {
+            editTextHours.setText(String.format("%02d", hours));
+            editTextMinutes.setText(String.format("%02d", minutes));
+            editTextSeconds.setText(String.format("%02d", seconds));
+        });
     }
-
-    public boolean isRunning() {
-        return isRunning;
-    }
-
     public void startStop() {
         isRunning = !isRunning;
 
         if (isRunning) {
-            startCountdown();
+            // Start the countdown timer
+            this.start();
         } else {
-            stopCountdown();
+            // Stop the countdown timer
+            this.cancel();
         }
     }
 
-    private void startCountdown() {
-        countDownTimer.start();
-    }
-
-    private void stopCountdown() {
-        countDownTimer.cancel();
-    }
-
-    private CountDownTimer createCountDownTimer() {
-        return new CountDownTimer(totalTimeInMillis, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                // Update UI or perform actions on tick
-            }
-
-            @Override
-            public void onFinish() {
-                // Handle countdown completion
-                isRunning = false;
-            }
-        };
-    }
-
-    private long calculateTotalTimeInMillis() {
-        return (seconds * 1000) + (minutes * 60000) + (hours * 3600000);
-    }
-
-
-    private ClockListener clockListener;
-
-    public void setClockListener(ClockListener clockListener) {
-        this.clockListener = clockListener;
-    }
-
-    private void notifyTick(long millisUntilFinished) {
-        if (clockListener != null) {
-            clockListener.onTick(millisUntilFinished);
-        }
-    }
-
-    private void notifyFinish() {
-        if (clockListener != null) {
-            clockListener.onFinish();
-        }
-    }
-
-//    public void onDeleteButtonClick(View view) {
-//        // Remove the corresponding clock from the list
-//        if (adapter != null) {
-//            adapter.removeClock(this);
-//        }
+//    public void startStop() { //Simpel version, der ikke bruger millis
+//        isRunning = !isRunning;
+//
+//        new Thread(() -> {
+//            while (isRunning) {
+//                if (seconds > 0) {
+//                    seconds--;
+//                } else if (seconds == 0 && minutes > 0) {
+//                    seconds = 59;
+//                    minutes--;
+//                } else if (seconds == 0 && minutes == 0 && hours > 0) {
+//                    seconds = 59;
+//                    minutes = 59;
+//                    hours--;
+//                } else {
+//                    isRunning = false;
+//                }
+//
+//                // Update UI on the main thread
+//                //runOnUiThread(() -> updateUI());
+//                handler.post(() -> updateUI());
+//
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
 //    }
+    @Override
+    public void onFinish() {
 
-    public void setAdapter(ClockAdapter adapter) {
-        this.adapter = adapter;
     }
 }
 
-
+//if ( minutes > 59 || seconds > 59) {
+//                Toast.makeText(this, "Minut- og sekundtal må ikke overskride 59", Toast.LENGTH_SHORT).show();
+//                return;
+//            }

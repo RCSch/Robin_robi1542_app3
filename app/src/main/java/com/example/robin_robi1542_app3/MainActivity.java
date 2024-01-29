@@ -4,16 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.widget.Button;
-import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +22,10 @@ public class MainActivity extends AppCompatActivity implements ClockListener {
     private ClockAdapter clockAdapter;
     private List<ClockActivity> clockList;
     private Button btnNew;
+
+    private Handler handler;
+
+    private EditText startHours, startMinutes, startSeconds;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +44,6 @@ public class MainActivity extends AppCompatActivity implements ClockListener {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
-
         btnNew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -49,41 +51,37 @@ public class MainActivity extends AppCompatActivity implements ClockListener {
             }
         });
     }
-
-//    private void addNewClock() {
-//        EditText editTextHours = findViewById(R.id.editTextHours);
-//        EditText editTextMinutes = findViewById(R.id.editTextMinutes);
-//        EditText editTextSeconds = findViewById(R.id.editTextSeconds);
-//
-//        try {
-//            int hours = Integer.parseInt(editTextHours.getText().toString());
-//            int minutes = Integer.parseInt(editTextMinutes.getText().toString());
-//            int seconds = Integer.parseInt(editTextSeconds.getText().toString());
-//
-//            // Validate the entered values
-//            if ( minutes > 59 || seconds > 59) {
-//                Toast.makeText(this, "Minut- og sekundtal må ikke overskride 59", Toast.LENGTH_SHORT).show();
-//                return;
-//            }
-//
-//            // Create a new ClockActivity instance and set the time components
-//            ClockActivity newClock = new ClockActivity();
-//            newClock.setHours(hours);
-//            newClock.setMinutes(minutes);
-//            newClock.setSeconds(seconds);
-//
-//            // Add the new clock to the list and notify the adapter
-//            clockList.add(newClock);
-//            clockAdapter.notifyDataSetChanged();
-//        } catch (NumberFormatException e) {
-//            // Handle invalid input (non-numeric values in EditText)
-//            Toast.makeText(this, "Indsæt venligst tal mellem 0 og 59 for minutter og sekunder", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-
     private void addNewClock() {
-        // Create a new ClockActivity instance with default values
-        ClockActivity newClock = new ClockActivity();
+        // Retrieve the values from the EditText fields
+        EditText editTextHours = findViewById(R.id.startHours);
+        EditText editTextMinutes = findViewById(R.id.startMinutes);
+        EditText editTextSeconds = findViewById(R.id.startTextSeconds);
+
+        // Here you should obtain the text from the EditText fields
+        String hoursText = editTextHours.getText().toString();
+        String minutesText = editTextMinutes.getText().toString();
+        String secondsText = editTextSeconds.getText().toString();
+
+        // Log the retrieved values for debugging
+        Log.d("AddNewClock", "Hours: " + hoursText + " Minutes: " + minutesText + " Seconds: " + secondsText);
+
+        // Check if any of the input strings is empty
+        if (hoursText.isEmpty() || minutesText.isEmpty() || secondsText.isEmpty()) {
+            // Handle the case where any of the input strings is empty
+            // You may show a toast or provide feedback to the user
+            return;
+        }
+
+        // Convert hours, minutes, and seconds to milliseconds
+        long totalMilliseconds = (Integer.parseInt(hoursText) * 3600 +
+                Integer.parseInt(minutesText) * 60 +
+                Integer.parseInt(secondsText)) * 1000;
+
+        // Log the totalMilliseconds for debugging
+        Log.d("AddNewClock", "Total Milliseconds: " + totalMilliseconds);
+
+        // Pass the totalMilliseconds when creating a new clock
+        ClockActivity newClock = new ClockActivity(totalMilliseconds, 1000, this, handler);
 
         // Add the new clock to the list and notify the adapter
         clockList.add(newClock);
@@ -92,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements ClockListener {
             clockAdapter.notifyDataSetChanged();
         }
     }
+
 
     @Override
     public void onStartStopClick(ClockActivity clock) {
@@ -104,8 +103,6 @@ public class MainActivity extends AppCompatActivity implements ClockListener {
         }
     }
 
-
-
     @Override
     public void onDeleteButtonClick(ClockActivity clock) {
         // Remove the clock from the list
@@ -116,16 +113,4 @@ public class MainActivity extends AppCompatActivity implements ClockListener {
             clockAdapter.notifyDataSetChanged();
         }
     }
-
-    @Override
-    public void onTick(long millisUntilFinished) {
-        // Update UI with the tick information
-
-    }
-
-    @Override
-    public void onFinish() {
-        //Man kunne godt lave et eller andet her, meeeeen...
-    }
-
 }
